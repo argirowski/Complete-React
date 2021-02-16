@@ -2,11 +2,21 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const Search = () => {
-  const [term, setTerm] = useState('');
+  const [term, setTerm] = useState('programming');
   const [debouncedTerm, setDebouncedTerm] = useState(term);
   const [results, setResults] = useState([]);
 
   //this updates term, useEffect sets a timer setDebouncedTerm, cancels previous timer, updates term and sets a new setDebouncedTerm timer
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedTerm(term);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [term]);
+
   useEffect(() => {
     const search = async () => {
       const { data } = await axios.get('https://en.wikipedia.org/w/api.php', {
@@ -21,9 +31,7 @@ const Search = () => {
 
       setResults(data.query.search);
     };
-    if (debouncedTerm) {
-      search();
-    }
+    search();
   }, [debouncedTerm]);
 
   // useEffect(() => {
@@ -61,20 +69,20 @@ const Search = () => {
       <div key={result.pageid} className='item'>
         <div className='right floated content'>
           <a
-            href={`https://en.wikipedia.org?curid=${result.pageid}`}
             className='ui button'
+            href={`https://en.wikipedia.org?curid=${result.pageid}`}
           >
-            More Info
+            Go
           </a>
         </div>
         <div className='content'>
           <div className='header'>{result.title}</div>
           <span dangerouslySetInnerHTML={{ __html: result.snippet }}></span>
-          {/* {result.snippet} */}
         </div>
       </div>
     );
   });
+
   return (
     <div>
       <div className='ui form'>
